@@ -5,7 +5,7 @@ import twitterkeys
 
 from requests_oauthlib import OAuth1Session
 
-checklist = ['ugwis','wanimaru','dyuma','magarimame','itowo','bgpat']
+checklist = ['ugwis','wanimaru','dyuma','itowo','bgpat']
 
 URL = "https://api.twitter.com/1.1/statuses/update.json"
 
