@@ -1,5 +1,5 @@
-twitterkeys.py
-__pycache__/
+aoj/witterkeys.py
+aoj/__pycache__/
 atcoder/solvedlist/
 atcoder/twitterkeys.py
 atcoder/__pycache__/
