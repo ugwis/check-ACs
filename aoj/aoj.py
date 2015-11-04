@@ -16,10 +16,10 @@ def tweet(text):
     return req.status_code
 
 def on_message(ws,message):
-    #print(message)
     obj = json.loads(message)
     if obj['userID'] in checklist and obj['status'] == 4:
-        status = tweet('[AOJ] ' + obj['userID'] + ' solved \'' + obj['problemTitle'] + '\' http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=' + str(obj['runID']))
+        print(message)
+        status = tweet('[AOJ] ' + obj['userID'] + ' solved \'' + obj['problemTitle'] + '\' http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=' + str(obj['problemID']))
 
 def on_error(ws,error):
     print(error)
