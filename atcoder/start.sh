@@ -1,6 +1,3 @@
 #! /usr/bin/sh
-while :
-do
-	python atcoder.py
-	sleep 5m
-done
+cd `dirname $0`
+python atcoder.py
