@@ -17,9 +17,13 @@ def tweet(text):
 
 def on_message(ws,message):
     obj = json.loads(message)
+    print(message)
     if obj['userID'] in checklist and obj['status'] == 4:
+        problem = str(obj['problemID'])
+        if obj['lessonID'] != "":
+            problem = obj['lessonID'] + "_" + problem
         print(message)
-        status = tweet('[AOJ] ' + obj['userID'] + ' solved \'' + obj['problemTitle'] + '\' http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=' + str(obj['problemID']))
+        status = tweet('[AOJ] ' + obj['userID'] + ' solved \'' + obj['problemTitle'] + '\' http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=' + problem)
 
 def on_error(ws,error):
     print(error)
