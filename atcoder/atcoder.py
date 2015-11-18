@@ -65,3 +65,4 @@ def check_user(user):
 if __name__ == "__main__":
     for user in checklist:
         check_user(user)
+    exit(0)
