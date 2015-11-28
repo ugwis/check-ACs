@@ -16,14 +16,13 @@ url_text = "https://api.twitter.com/1.1/statuses/update.json"
 
 def make_graph(filename,pid,rid,lang,cpu,mem,code):
     plt.clf()
-    f = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/solved_record?problem_id=' + str(pid))
+    f = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/solved_record?problem_id=' + str(pid) + '&language=' + lang)
     result = xmltodict.parse(f.read())
-    cputime = []
-    memory = []
-    codesize = []
+    cputime = [cpu]
+    memory = [mem]
+    codesize = [code]
     for solved in result['solved_record_list']['solved']:
-        print(solved)
-        if solved['language'] == lang and solved['run_id'] != rid:
+        if solved['run_id'] != rid:
             cputime.append(int(solved['cputime'])*100)
             memory.append(int(solved['memory']))
             codesize.append(int(solved['code_size']))
