@@ -52,8 +52,13 @@ def check_user(user):
     else:#check new AC
         fd.close()
         for suc in succ:
+            print(suc)
             problemURL = suc.a.get('href')
             problemName = suc.a.string
+            if problemURL is None or problemName is None:
+                break
+            print(problemURL)
+            print(problemName)
             if not problemURL in sucArr:
                 sucArr.append(problemURL)
                 status = tweet('[AtCoder] ' + user + ' solved \'' + problemName + '\' ' + problemURL)
