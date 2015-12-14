@@ -1,20 +1,17 @@
 import websocket
 import time
 import json
-import twitterkeys
 import matplotlib.pyplot as plt
 import numpy as np
 import xmltodict
 import urllib.request
+import twitter
 
-from requests_oauthlib import OAuth1Session
+checkusers = ['ugwis','wanimaru','dyuma','iyselee','bgpat','toga2048','tomosan26']
 
-checklist = ['ugwis','wanimaru','dyuma','iyselee','bgpat','toga2048']
+histogram_filename = "hist-aoj.png"
 
-url_media = "https://upload.twitter.com/1.1/media/upload.json"
-url_text = "https://api.twitter.com/1.1/statuses/update.json"
-
-def make_graph(filename,pid,rid,lang,cpu,mem,code):
+def make_histogram(filename,pid,rid,lang,cpu,mem,code):
     plt.clf()
     f = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/solved_record?problem_id=' + str(pid) + '&language=' + lang)
     result = xmltodict.parse(f.read())
@@ -34,6 +31,9 @@ def make_graph(filename,pid,rid,lang,cpu,mem,code):
         plt.xlabel(xlabel,size=14)
         plt.ylabel("Frequency",size=14)
 
+    print(cputime)
+    print(codesize)
+    print(memory)
     subplt(511,cputime,30,cpu*100,"CPU Time (ms)")
 
     subplt(513,codesize,30,code,"Code Size (Byte)")
@@ -42,41 +42,17 @@ def make_graph(filename,pid,rid,lang,cpu,mem,code):
 
     plt.savefig(filename)
 
-def upload_image(filename):
-
-    # OAuth認証 セッションを開始
-    twitter = OAuth1Session(twitterkeys.CK, twitterkeys.CS, twitterkeys.AT, twitterkeys.AS)
-
-    # 画像投稿
-    files = {"media" : open(filename, 'rb')}
-    req_media = twitter.post(url_media, files = files)
-
-    # レスポンスを確認
-    if req_media.status_code != 200:
-        print ("画像アップデート失敗: %s", req_media.text)
-        exit()
-
-    # Media ID を取得
-    media_id = json.loads(req_media.text)['media_id']
-    print ("Media ID: %d" % media_id)
-    return media_id
-
-def tweet(text,params):
-    twitter = OAuth1Session(twitterkeys.CK, twitterkeys.CS, twitterkeys.AT, twitterkeys.AS)
-    req = twitter.post(url_text, params = params)
-    return req.status_code
-
 def on_message(ws,message):
     obj = json.loads(message)
-    if obj['userID'] in checklist and obj['status'] == 4:
+    if obj['userID'] in checkusers and obj['status'] == 4:
         problem = str(obj['problemID'])
         print(message)
         if obj['lessonID'] != "":
             problem = obj['lessonID'] + "_" + problem
         tweet_text = '[AOJ] ' + obj['userID'] + ' solved \'' + obj['problemTitle'] + '\' http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=' + problem
-        make_graph("graph.png",problem,obj['runID'],obj['lang'],obj['cputime'],obj['memory'],obj['code'])
-        media_id = upload_image("graph.png")
-        status = tweet(url_text,{"status": tweet_text,"media_ids": media_id})
+        make_histogram(histogram_filename,problem,obj['runID'],obj['lang'],obj['cputime'],obj['memory'],obj['code'])
+        media_id = twitter.upload_image(histogram_filename)
+        status = twitter.tweet({"status": tweet_text,"media_ids": media_id})
 
 def on_error(ws,error):
     print(error)
@@ -84,6 +60,7 @@ def on_error(ws,error):
 
 def on_close(ws):
     print("close")
+    connect()
     exit(0)
 
 def connect():

@@ -1,6 +1,5 @@
-aoj/twitterkeys.py
-aoj/__pycache__/
-aoj/graph.png
-atcoder/solvedlist/
-atcoder/twitterkeys.py
-atcoder/__pycache__/
+twitterkeys.py
+pguser.py
+__pycache__/
+hist-atcoder.png
+hist-aoj.png
