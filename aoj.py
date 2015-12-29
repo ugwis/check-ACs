@@ -11,36 +11,34 @@ checkusers = ['ugwis','wanimaru','dyuma','iyselee','bgpat','toga2048','tomosan26
 
 histogram_filename = "hist-aoj.png"
 
-def make_histogram(filename,pid,rid,lang,cpu,mem,code):
+def make_histogram(savefile,pid,your_rid,lang,your_cpu,your_mem,your_code):
     plt.clf()
     f = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/solved_record?problem_id=' + str(pid) + '&language=' + lang)
     result = xmltodict.parse(f.read())
-    cputime = [cpu]
-    memory = [mem]
-    codesize = [code]
+    cputime = [your_cpu]
+    memory = [your_mem]
+    codesize = [your_code]
     for solved in result['solved_record_list']['solved']:
-        if solved['run_id'] != rid:
+        if solved['run_id'] != your_rid:
             cputime.append(int(solved['cputime'])*100)
             memory.append(int(solved['memory']))
             codesize.append(int(solved['code_size']))
-    def subplt(pos,data,bins,x,xlabel):
-        plt.subplot(pos)
+    
+    def add_subplt(plt_pos,data,bins,your_data,xlabel):
+        plt.subplot(plt_pos)
         plt.hist(data,bins=bins,alpha=0.5)
         plt.yticks(list(map(int,np.linspace(plt.ylim()[0],plt.ylim()[1],3))))
-        plt.axvline(x=x,linewidth=1,color='r')
+        plt.axvline(x=your_data,linewidth=1,color='r')
         plt.xlabel(xlabel,size=14)
         plt.ylabel("Frequency",size=14)
 
-    print(cputime)
-    print(codesize)
-    print(memory)
-    subplt(511,cputime,30,cpu*100,"CPU Time (ms)")
+    add_subplt(511,cputime,30,your_cpu*100,"CPU Time (ms)")
 
-    subplt(513,codesize,30,code,"Code Size (Byte)")
+    add_subplt(513,codesize,30,your_code,"Code Size (Byte)")
 
-    subplt(515,memory,30,mem,"Memory (KByte)")
+    add_subplt(515,memory,30,your_mem,"Memory (KByte)")
 
-    plt.savefig(filename)
+    plt.savefig(savefile)
 
 def on_message(ws,message):
     obj = json.loads(message)
