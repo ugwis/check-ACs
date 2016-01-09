@@ -149,12 +149,12 @@ def crawl_atcoder_jp():
     contests = soup.find_all(href=re.compile("contest.atcoder.jp"))
     for contest in contests:
         contest_url = contest.get('href')
-        rex = re.compile("\w*//(\w*)\.contest\.atcoder\.jp/")
+        rex = re.compile("\w*//(\w*)\.contest\.atcoder\.jp\w*")
         match = rex.search(contest_url)
         if match is not None:
             print(match.group(1))
             try:
-                cur.execure("INSERT INTO contest(cid) VALUES (%s)",[match.group(1)])
+                cur.execute("INSERT INTO contest(cid) VALUES (%s)",[match.group(1)])
                 connector.commit()
             except:
                 print("Already inserted or Something wrong")
