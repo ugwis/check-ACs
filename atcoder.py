@@ -14,7 +14,7 @@ import json
 from requests_oauthlib import OAuth1Session
 from bs4 import BeautifulSoup
 
-checkusers = ['bgpat','goryudyuma','Makinami','murashin','not_seele','toga2048','ugwis','wanimaru47']
+checkusers = ['bgpat','goryudyuma','Makinami','murashin','not_seele','toga2048','ugwis','wanimaru47','tsunetoki']
 
 histogram_filename = "hist-atcoder.png"
 
