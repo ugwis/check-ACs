@@ -143,21 +143,23 @@ def insert(cid):
         i+=1
 
 def crawl_atcoder_jp():
-    cur = connector.cursor()
+    cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     r = requests.get(url_atcoder_jp)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
     contests = soup.find_all(href=re.compile("contest.atcoder.jp"))
     for contest in contests:
         contest_url = contest.get('href')
+        print(contest_url)
         rex = re.compile("\w*//(\w*)\.contest\.atcoder\.jp\w*")
         match = rex.search(contest_url)
         if match is not None:
             print(match.group(1))
             try:
-                cur.execute("INSERT INTO contest(cid) VALUES (%s)",[match.group(1)])
+                cur.execute("""INSERT INTO contest(cid) VALUES (%s)""",(match.group(1),))
                 connector.commit()
             except:
                 print("Already inserted or Something wrong")
+        print("")
     cur.close()
 
 def update_solvedlist():
