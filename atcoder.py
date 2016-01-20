@@ -143,24 +143,25 @@ def insert(cid):
         i+=1
 
 def crawl_atcoder_jp():
-    cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     r = requests.get(url_atcoder_jp)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
     contests = soup.find_all(href=re.compile("contest.atcoder.jp"))
     for contest in contests:
         contest_url = contest.get('href')
-        print(contest_url)
-        rex = re.compile("\w*//(\w*)\.contest\.atcoder\.jp\w*")
+        rex = re.compile("\w*//(.*)\.contest\.atcoder\.jp\w*")
         match = rex.search(contest_url)
         if match is not None:
             print(match.group(1))
+            connector = psycopg2.connect(pguser.arg)
+            cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
                 cur.execute("""INSERT INTO contest(cid) VALUES (%s)""",(match.group(1),))
                 connector.commit()
             except:
                 print("Already inserted or Something wrong")
+            cur.close()
+            connector.close()
         print("")
-    cur.close()
 
 def update_solvedlist():
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -177,13 +178,13 @@ def update_solvedlist():
 if __name__ == "__main__":
     param = sys.argv
 
-    connector = psycopg2.connect(pguser.arg)
 
     if len(param) == 1:
+        connector = psycopg2.connect(pguser.arg)
         update_solvedlist()
+        connector.close()
     elif param[1] == "-update-contest-list":
         crawl_atcoder_jp()
 
    
-    connector.close()
     exit(0)
