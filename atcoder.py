@@ -119,7 +119,7 @@ def crawl_contest(url):
             print(url + ":exception")
     return ret
 
-def insert(cid):
+def insert(cid,type):
     i = 1
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     while True:
@@ -134,7 +134,9 @@ def insert(cid):
                 print(solved['userid'] + " > " + solved['problem'])
             except:
                 connector.commit()
-                return
+                if type == 'normal':
+                    return
+                continue
             if solved['userid'] in checkusers:
                 tweet_text = '[AtCoder] ' + solved['userid'] + ' solved \'' + solved['problemTitle'] + '\' http://' + cid + "." + contest_atcoder + solved['problemURL']
                 make_histogram(histogram_filename,solved['problem'],solved['rid'],solved['lang'],int(solved['cpu_time']),int(solved['memory_usage']),int(solved['code_size']))
@@ -151,11 +153,12 @@ def crawl_atcoder_jp():
         rex = re.compile("\w*//(.*)\.contest\.atcoder\.jp\w*")
         match = rex.search(contest_url)
         if match is not None:
-            print(match.group(1))
+            cid = match.group(1)
+            print(cid)
             connector = psycopg2.connect(pguser.arg)
             cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
-                cur.execute("""INSERT INTO contest(cid) VALUES (%s)""",(match.group(1),))
+                cur.execute("""INSERT INTO contest(cid) VALUES (%s)""",(cid,))
                 connector.commit()
             except:
                 print("Already inserted or Something wrong")
@@ -163,7 +166,7 @@ def crawl_atcoder_jp():
             connector.close()
         print("")
 
-def update_solvedlist():
+def update_solvedlist(type):
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM contest;")
     contest = []
@@ -172,7 +175,7 @@ def update_solvedlist():
     cur.close()
     cur = connector.cursor()
     for cid in contest:
-        insert(cid)
+        insert(cid,type)
     cur.close()
 
 if __name__ == "__main__":
@@ -181,10 +184,17 @@ if __name__ == "__main__":
 
     if len(param) == 1:
         connector = psycopg2.connect(pguser.arg)
-        update_solvedlist()
+        update_solvedlist("normal")
         connector.close()
     elif param[1] == "-update-contest-list":
         crawl_atcoder_jp()
+    elif param[1] == "-check-all-solved":
+        connector = psycopg2.connect(pguser.arg)
+        if len(param) == 2:
+            update_solvedlist("all")
+        else:
+            insert(param[2],"all")
+        connector.close()
 
    
     exit(0)
