@@ -42,3 +42,34 @@ CREATE TABLE problems (
 	problemid	TEXT UNIQUE,
 	title		TEXT
 );
+
+CREATE OR REPLACE FUNCTION insert_user(id TEXT,name TEXT)
+RETURNS INTEGER AS
+$$
+	DECLARE
+		ret INTEGER;
+	BEGIN
+		INSERT INTO users(userid,username) VALUES(id,name) returning uid INTO ret;
+		return ret;
+	EXCEPTION WHEN unique_violation THEN
+		SELECT uid FROM users WHERE userid=id INTO ret;
+		RETURN ret;
+	END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insert_language(lname TEXT)
+RETURNS INTEGER AS
+$$
+	DECLARE
+		ret INTEGER;
+	BEGIN
+		INSERT INTO languages(name) VALUES(lname) returning lid INTO ret;
+		return ret;
+	EXCEPTION WHEN unique_violation THEN
+		SELECT lid FROM languages WHERE name=lname INTO ret;
+		RETURN ret;
+	END;
+$$
+LANGUAGE plpgsql;
+
