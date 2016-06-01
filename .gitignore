@@ -1,5 +1,8 @@
 twitterkeys.py
+twitterkeys.pyc
 pguser.py
+pguser.pyc
 __pycache__/
 hist-atcoder.png
 hist-aoj.png
+.DS_Store
