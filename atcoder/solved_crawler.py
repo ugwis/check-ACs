@@ -104,6 +104,7 @@ def insert_solved(rid,userid,username,contestid,problemid,language,cputime,memor
     cur.close()
     connector.close()
     print("inserted:" + str(rid))
+    return 1
 
 def crawl_contest_solved_page(cid,page,type):
     url = "http://" + cid + "." + contest_atcoder + "/submissions/all/" + str(page) + "?status=AC"
@@ -140,12 +141,13 @@ def crawl_contest_solved_pages(cid,type):
         i+=1
         try:
             status = crawl_contest_solved_page(cid,i,type)
-            #print(status)
+            print(status)
             if status == 'Finish':
                 return
             if status == 'Failed' and type != 'all':
                 return
         except Exception as e:
+            print("exception pages")
             print(e.message)
             return
 
@@ -154,12 +156,13 @@ def fetch_ended_contest_list():
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     contest = []
     try:
-        cur.execute("SELECT contests.contestid as contestid,count(solved.rid) as cnt FROM contests LEFT JOIN solved ON contests.cid = solved.cid WHERE contests.endtime <= now() GROUP BY contests.cid ORDER BY contests.endtime DESC;")
+        cur.execute("SELECT contests.contestid as contestid,count(solved.rid) as cnt,contests.crawled FROM contests LEFT JOIN solved ON contests.cid = solved.cid WHERE contests.endtime <= now() GROUP BY contests.cid ORDER BY contests.endtime DESC;")
         connector.commit()
         for row in cur:
             contest.append({
                 "contestid":row['contestid'],
-                "cnt":row['cnt']
+                "cnt":row['cnt'],
+                "crawled":row['crawled']
             })
     except Exception as e:
         print(e.message)
@@ -169,8 +172,10 @@ if __name__ == "__main__":
     #crawl_contest_solved_page("abc001",378)
     #crawl_contest_solved_pages("abc001","all")
     contests = fetch_ended_contest_list()
-
     for contest in contests:
-        crawl_contest_solved_pages(contest['contestid'],"normal")
+        if contest['crawled']:
+            crawl_contest_solved_pages(contest['contestid'],"normal")
+        else:
+            crawl_contest_solved_pages(contest['contestid'],"all")
 
     exit(0)

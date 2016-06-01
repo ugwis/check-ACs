@@ -49,8 +49,11 @@ def crawl_atcoder_jp():
 def insert_problem(cid,problemid,title):
     connector = psycopg2.connect(pguser.arg)
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""INSERT INTO problems(cid,problemid,title) VALUES(%s,%s,%s)""",(cid,problemid,title))
-    connector.commit()
+    try:
+        cur.execute("""INSERT INTO problems(cid,problemid,title) VALUES(%s,%s,%s)""",(cid,problemid,title))
+        connector.commit()
+    except Exception as e:
+        print(e.message)
     cur.close()
     connector.close()
 
@@ -67,6 +70,11 @@ def crawl_contest(contestid,cid):
     print("crawl:" + url)
     r = requests.get(url)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
+    print(r.text)
+    tasks = soup.find_all("tr")
+    print(tasks)
+    if tasks == []:
+        return
     contest_name = soup.find("span",class_="contest-name").string
     print(contest_name)
     contest_term = soup.find_all("time")
@@ -76,7 +84,6 @@ def crawl_contest(contestid,cid):
     print(contest_end)
     insert_contest(contest_name,contest_begin,contest_end,contestid)
  
-    tasks = soup.find_all("tr")
     for task in tasks:
         i=0
         for td in task.find_all("td"):
@@ -90,7 +97,7 @@ def crawl_contest(contestid,cid):
 def fetch_contest_list():
     connector = psycopg2.connect(pguser.arg)
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM contests WHERE name IS NULL;")
+    cur.execute("SELECT * FROM contests;")
     contest = []
     for row in cur:
         contest.append({
@@ -104,6 +111,7 @@ def fetch_contest_list():
     return contest
 
 if __name__ == "__main__":
+    #crawl_contest('atc002',1)
     crawl_atcoder_jp()
     contest_list = fetch_contest_list()
     for contest in contest_list:
