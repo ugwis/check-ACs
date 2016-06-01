@@ -20,7 +20,8 @@ CREATE TABLE solved (
 	cputime		INTEGER,
 	memory		INTEGER,
 	codesize	INTEGER,
-	datetime	TIMESTAMP
+	datetime	TIMESTAMP,
+	checked		boolean DEFAULT false
 );
 
 CREATE TABLE languages (
@@ -33,14 +34,16 @@ CREATE TABLE contests (
 	contestid	TEXT UNIQUE,
 	name		TEXT,
 	begintime	TIMESTAMP,
-	endtime		TIMESTAMP
+	endtime		TIMESTAMP,
+	crawled		BOOLEAN DEFAULT FALSE,
 );
 
 CREATE TABLE problems (
 	pid			SERIAL PRIMARY KEY,
 	cid			SERIAL,
-	problemid	TEXT UNIQUE,
-	title		TEXT
+	problemid	TEXT,
+	title		TEXT,
+	UNIQUE(cid,problemid)
 );
 
 CREATE OR REPLACE FUNCTION insert_user(id TEXT,name TEXT)
