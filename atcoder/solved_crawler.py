@@ -156,12 +156,11 @@ def fetch_ended_contest_list():
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     contest = []
     try:
-        cur.execute("SELECT contests.contestid as contestid,count(solved.rid) as cnt,contests.crawled FROM contests LEFT JOIN solved ON contests.cid = solved.cid WHERE contests.endtime <= now() GROUP BY contests.cid ORDER BY contests.endtime DESC;")
+        cur.execute("SELECT contestid,crawled FROM contests WHERE endtime <= now() GROUP BY cid ORDER BY endtime DESC;")
         connector.commit()
         for row in cur:
             contest.append({
                 "contestid":row['contestid'],
-                "cnt":row['cnt'],
                 "crawled":row['crawled']
             })
     except Exception as e:
