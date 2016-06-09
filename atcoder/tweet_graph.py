@@ -211,7 +211,7 @@ if __name__ == "__main__":
                 userid = fetch_userid(user['uid'])
                 contestid = fetch_contestid(user['cid'])
                 problem = fetch_problem(user['pid'])
-                tweet_text = '[AtCoder] ' + userid + ' solved \'' + problem['title'] + '\' http://' + contestid + "." + contest_atcoder + "/" + problem['problemid']
+                tweet_text = '[AtCoder] ' + userid + ' solved \'' + problem['title'] + '\' http://' + contestid + "." + contest_atcoder + "/tasks/" + problem['problemid']
                 media_id = upload_image(filename)
                 status = tweet(url_text,{"status":tweet_text,"media_ids":media_id})
             update_checked(user['rid'])
