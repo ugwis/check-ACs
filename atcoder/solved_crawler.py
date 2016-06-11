@@ -106,8 +106,8 @@ def insert_solved(rid,userid,username,contestid,problemid,language,cputime,memor
     print("inserted:" + str(rid))
     return 1
 
-def crawl_contest_solved_page(cid,page,type):
-    url = "http://" + cid + "." + contest_atcoder + "/submissions/all/" + str(page) + "?status=AC"
+def crawl_contest_solved_page(contestid,page,type):
+    url = "http://" + contestid + "." + contest_atcoder + "/submissions/all/" + str(page) + "?status=AC"
     print(url)
     ret = []
     r = requests.get(url)
@@ -123,7 +123,7 @@ def crawl_contest_solved_page(cid,page,type):
                 regex("/submissions/(\d*)",row[9].a.get("href")),
                 regex("/users/(\w*)",row[2].a.get("href")),
                 row[2].a.string,
-                cid,
+                contestid,
                 regex("/tasks/(\w*)",row[1].a.get("href")),
                 row[3].string,
                 regex("(\d*) ms",row[7].string),
@@ -143,13 +143,15 @@ def update_crawled(cid):
         connector.commit()
     except Exception as e:
         print(e.message)
+    cur.close()
+    connector.close()
 
-def crawl_contest_solved_pages(cid,type):
+def crawl_contest_solved_pages(cid,contestid,type):
     i = 0
     while True:
         i+=1
         try:
-            status = crawl_contest_solved_page(cid,i,type)
+            status = crawl_contest_solved_page(contestid,i,type)
             print(status)
             if status == 'Finish':
                 update_crawled(cid)
@@ -166,10 +168,11 @@ def fetch_ended_contest_list():
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     contest = []
     try:
-        cur.execute("SELECT contestid,crawled FROM contests WHERE endtime <= now() GROUP BY cid ORDER BY endtime DESC;")
+        cur.execute("SELECT cid,contestid,crawled FROM contests WHERE endtime <= now() GROUP BY cid ORDER BY endtime DESC;")
         connector.commit()
         for row in cur:
             contest.append({
+                "cid":row['cid'],
                 "contestid":row['contestid'],
                 "crawled":row['crawled']
             })
@@ -183,8 +186,8 @@ if __name__ == "__main__":
     contests = fetch_ended_contest_list()
     for contest in contests:
         if contest['crawled']:
-            crawl_contest_solved_pages(contest['contestid'],"normal")
+            crawl_contest_solved_pages(contest['cid'],contest['contestid'],"normal")
         else:
-            crawl_contest_solved_pages(contest['contestid'],"all")
+            crawl_contest_solved_pages(contest['cid'],contest['contestid'],"all")
 
     exit(0)
