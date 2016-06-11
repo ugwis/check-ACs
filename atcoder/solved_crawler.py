@@ -135,6 +135,15 @@ def crawl_contest_solved_page(cid,page,type):
                 return "Failed"
     return 1
 
+def update_crawled(cid):
+    connector = psycopg2.connect(pguser.arg)
+    cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cur.execute("""UPDATE contests SET crawled=True Where cid=(%s)""",(cid,))
+        connector.commit()
+    except Exception as e:
+        print(e.message)
+
 def crawl_contest_solved_pages(cid,type):
     i = 0
     while True:
@@ -143,6 +152,7 @@ def crawl_contest_solved_pages(cid,type):
             status = crawl_contest_solved_page(cid,i,type)
             print(status)
             if status == 'Finish':
+                update_crawled(cid)
                 return
             if status == 'Failed' and type != 'all':
                 return

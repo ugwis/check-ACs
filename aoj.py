@@ -4,8 +4,8 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import xmltodict
-import urllib.request
 import twitter
+import requests
 
 checkusers = ['ugwis','wanimaru','dyuma','iyselee','bgpat','toga2048','tomosan26']
 
@@ -13,8 +13,8 @@ histogram_filename = "hist-aoj.png"
 
 def make_histogram(savefile,pid,your_rid,lang,your_cpu,your_mem,your_code):
     plt.clf()
-    f = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/solved_record?problem_id=' + str(pid) + '&language=' + lang)
-    result = xmltodict.parse(f.read())
+    r = requests.get('http://judge.u-aizu.ac.jp/onlinejudge/webservice/solved_record?problem_id=' + str(pid) + '&language=' + lang)
+    result = xmltodict.parse(r.text.encode(r.encoding))
     cputime = [your_cpu]
     memory = [your_mem]
     codesize = [your_code]

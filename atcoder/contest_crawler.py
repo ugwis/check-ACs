@@ -70,7 +70,6 @@ def crawl_contest(contestid,cid):
     print("crawl:" + url)
     r = requests.get(url)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
-    print(r.text)
     tasks = soup.find_all("tr")
     print(tasks)
     if tasks == []:
@@ -91,7 +90,6 @@ def crawl_contest(contestid,cid):
             if i == 2:
                 problemid = regex("/tasks/(\w*)",td.a.get("href"))
                 title = td.a.string
-                print(problemid + " " + title)
                 insert_problem(cid,problemid,title)
   
 def fetch_contest_list():
