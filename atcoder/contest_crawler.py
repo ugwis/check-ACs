@@ -24,6 +24,7 @@ def regex(r,text):
     return match.group(1)
 
 def crawl_atcoder_jp():
+    global connector
     r = requests.get(url_atcoder_jp)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
     contests = soup.find_all(href=re.compile("contest.atcoder.jp"))
@@ -34,36 +35,38 @@ def crawl_atcoder_jp():
         if match is not None:
             cid = match.group(1)
             print(cid)
-            connector = psycopg2.connect(pguser.arg)
             cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
                 cur.execute("""INSERT INTO contests(contestid) VALUES (%s)""",(cid,))
                 connector.commit()
             except Exception as e:
+                connector.rollback()
                 print("Already inserted or Something wrong")
                 print(e.message)
             cur.close()
-            connector.close()
         print("")
 
 def insert_problem(cid,problemid,title):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("""INSERT INTO problems(cid,problemid,title) VALUES(%s,%s,%s)""",(cid,problemid,title))
         connector.commit()
     except Exception as e:
+        connector.commit()
         print(e.message)
     cur.close()
-    connector.close()
 
 def insert_contest(contest_name,contest_begin,contest_end,contestid):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""UPDATE contests SET name=(%s), begintime=timestamp%s + interval '9 hours', endtime=timestamp%s + interval '9 hours' WHERE contestid=(%s)""",(contest_name,contest_begin,contest_end,contestid,))
-    connector.commit()
+    try:
+        cur.execute("""UPDATE contests SET name=(%s), begintime=timestamp%s + interval '9 hours', endtime=timestamp%s + interval '9 hours' WHERE contestid=(%s)""",(contest_name,contest_begin,contest_end,contestid,))
+        connector.commit()
+    except Exception as e:
+        connector.rollback()
+        print(e.message)
     cur.close()
-    connector.close()
 
 def crawl_contest(contestid,cid):
     url = "http://" + contestid + "." + contest_atcoder + "/assignments"
@@ -93,28 +96,34 @@ def crawl_contest(contestid,cid):
                 insert_problem(cid,problemid,title)
   
 def fetch_contest_list():
-    connector = psycopg2.connect(pguser.arg)
+    global connector
+    print(connector)
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM contests;")
     contest = []
-    for row in cur:
-        contest.append({
-            "contestid":row['contestid'],
-            "cid":row['cid']
-        })
+    try:
+        cur.execute("""SELECT * FROM contests;""")
+        connector.commit()
+        for row in cur:
+            contest.append({
+                "contestid":row['contestid'],
+                "cid":row['cid']
+            })
+    except Exception as e:
+        connector.rollback()
+        print(e.message)
     cur.close()
-    cur = connector.cursor()
-    cur.close()
-    connector.close()
     return contest
 
 if __name__ == "__main__":
+    connector = psycopg2.connect(pguser.arg)
     #crawl_contest('atc002',1)
     crawl_atcoder_jp()
     contest_list = fetch_contest_list()
+    print(contest_list)
     for contest in contest_list:
         try:
             crawl_contest(contest['contestid'],contest['cid'])
         except Exception as e:
             print(e.message)
+    connector.close()
     exit(0)
