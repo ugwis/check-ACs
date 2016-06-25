@@ -30,7 +30,7 @@ def regex(r,text):
     return match.group(1)
 
 def insert_user(userid,username):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     uid = None
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
@@ -39,13 +39,13 @@ def insert_user(userid,username):
         for row in cur:
             uid = row['uid']
     except Exception as e:
+        connector.rollback()
         print(e.message)
     cur.close()
-    connector.close()
     return uid
 
 def insert_language(name):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("""SELECT insert_language((%s)) as lid""",(name,))
@@ -53,13 +53,13 @@ def insert_language(name):
         for row in cur:
             lid = row['lid']
     except Exception as e:
+        connector.rollback()
         print(e.message)
     cur.close()
-    connector.close()
     return lid
 
 def fetch_pid(cid,problemid):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     pid = None
     try:
@@ -69,11 +69,10 @@ def fetch_pid(cid,problemid):
     except Exception as e:
         print(e.message)
     cur.close()
-    connector.close()
     return pid
 
 def fetch_cid(contestid):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cid = None
     try:
@@ -83,26 +82,23 @@ def fetch_cid(contestid):
     except Exception as e:
         print(e.message)
     cur.close()
-    connector.close()
     return cid
 
 def insert_solved(rid,userid,username,contestid,problemid,language,cputime,memory,codesize,datetime):
+    global connector
     uid = insert_user(userid,username)
     lid = insert_language(language)
     cid = fetch_cid(contestid)
     pid = fetch_pid(cid,problemid)
-    connector = psycopg2.connect(pguser.arg)
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("""INSERT INTO solved(rid,uid,cid,pid,lid,cputime,memory,codesize,datetime) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(rid,uid,cid,pid,lid,cputime,memory,codesize,datetime))
         connector.commit()
     except Exception as e:
-        #print(e.message)
+        connector.rollback()
         cur.close()
-        connector.close()
         return None
     cur.close()
-    connector.close()
     print("inserted:" + str(rid))
     return 1
 
@@ -136,15 +132,15 @@ def crawl_contest_solved_page(contestid,page,type):
     return 1
 
 def update_crawled(cid):
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("""UPDATE contests SET crawled=True Where cid=(%s)""",(cid,))
         connector.commit()
     except Exception as e:
+        connector.rollback()
         print(e.message)
     cur.close()
-    connector.close()
 
 def crawl_contest_solved_pages(cid,contestid,type):
     i = 0
@@ -164,7 +160,7 @@ def crawl_contest_solved_pages(cid,contestid,type):
             return
 
 def fetch_ended_contest_list():
-    connector = psycopg2.connect(pguser.arg)
+    global connector
     cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
     contest = []
     try:
@@ -177,17 +173,18 @@ def fetch_ended_contest_list():
                 "crawled":row['crawled']
             })
     except Exception as e:
+        connector.rollback()
         print(e.message)
+    cur.close()
     return contest
 
 if __name__ == "__main__":
-    #crawl_contest_solved_page("abc001",378)
-    #crawl_contest_solved_pages("abc001","all")
+    connector = psycopg2.connect(pguser.arg)
     contests = fetch_ended_contest_list()
     for contest in contests:
         if contest['crawled']:
             crawl_contest_solved_pages(contest['cid'],contest['contestid'],"normal")
         else:
             crawl_contest_solved_pages(contest['cid'],contest['contestid'],"all")
-
+    connector.close()
     exit(0)
