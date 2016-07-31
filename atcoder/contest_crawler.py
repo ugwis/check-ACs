@@ -9,8 +9,6 @@ import dateutil.parser
 import pguser
 from bs4 import BeautifulSoup
 
-checkusers = ['bgpat','goryudyuma','Makinami','murashin','not_seele','toga2048','ugwis','wanimaru47','tsunetoki','sn_93','scn_13k','fono09']
-
 url_atcoder_jp = "http://atcoder.jp"
 contest_atcoder = "contest.atcoder.jp"
 
@@ -116,7 +114,6 @@ def fetch_contest_list():
 
 if __name__ == "__main__":
     connector = psycopg2.connect(pguser.arg)
-    #crawl_contest('atc002',1)
     crawl_atcoder_jp()
     contest_list = fetch_contest_list()
     print(contest_list)

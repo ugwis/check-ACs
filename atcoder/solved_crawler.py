@@ -11,8 +11,6 @@ import numpy as np
 import json
 from bs4 import BeautifulSoup
 
-checkusers = ['bgpat','goryudyuma','Makinami','murashin','not_seele','toga2048','ugwis','wanimaru47','tsunetoki','sn_93','scn_13k','fono09']
-
 histogram_filename = "hist-atcoder.png"
 
 url_atcoder_jp = "http://atcoder.jp"
