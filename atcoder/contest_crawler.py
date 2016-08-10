@@ -68,20 +68,21 @@ def insert_contest(contest_name,contest_begin,contest_end,contestid):
 
 def crawl_contest(contestid,cid):
     url = "http://" + contestid + "." + contest_atcoder + "/assignments"
-    print("crawl:" + url)
+    print("crawl URL: " + url)
     r = requests.get(url)
+    print(r.text.encode(r.encoding))
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
     tasks = soup.find_all("tr")
     print(tasks)
     if tasks == []:
         return
     contest_name = soup.find("span",class_="contest-name").string
-    print(contest_name)
+    print("contest name: " + contest_name)
     contest_term = soup.find_all("time")
     contest_begin = contest_term[0].string
     contest_end = contest_term[1].string
-    print(contest_begin)
-    print(contest_end)
+    print("contest begin: " + contest_begin)
+    print("contest end: " + contest_end)
     insert_contest(contest_name,contest_begin,contest_end,contestid)
  
     for task in tasks:

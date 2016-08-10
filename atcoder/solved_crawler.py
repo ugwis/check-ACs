@@ -115,7 +115,7 @@ def crawl_contest_solved_page(contestid,page,type):
             continue
         if insert_solved(
                 regex("/submissions/(\d*)",row[9].a.get("href")),
-                regex("/users/(\w*)",row[2].a.get("href")),
+                regex("/user/(\w*)",row[2].a.get("href")),
                 row[2].a.string,
                 contestid,
                 regex("/tasks/(\w*)",row[1].a.get("href")),
