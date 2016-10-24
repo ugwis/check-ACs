@@ -35,7 +35,7 @@ CREATE TABLE contests (
 	name		TEXT,
 	begintime	TIMESTAMP,
 	endtime		TIMESTAMP,
-	crawled		BOOLEAN DEFAULT FALSE,
+	crawled		BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE problems (

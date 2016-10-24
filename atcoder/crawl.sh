@@ -1,5 +1,5 @@
 #!/bin/sh
-while True
+while true
 do
 	sh atcoder.sh
 	sleep 1m
