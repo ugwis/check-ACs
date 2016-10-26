@@ -1,15 +1,17 @@
 #!/user/bin/python
 # -*- coding: utf-8 -*-
 import requests
+import os
 import re
 import sys
 import psycopg2
 import psycopg2.extras
 import dateutil.parser
 import pguser
+from selenium import webdriver
 from bs4 import BeautifulSoup
 
-url_atcoder_jp = "http://atcoder.jp"
+url_atcoder_jp = "https://atcoder.jp"
 contest_atcoder = "contest.atcoder.jp"
 
 def regex(r,text):
@@ -21,11 +23,14 @@ def regex(r,text):
         return None
     return match.group(1)
 
-def crawl_atcoder_jp():
+def crawl_contest_list(page):
     global connector
+    url = url_atcoder_jp + "/contest/archive?lang=ja&p=" + str(page)
     r = requests.get(url_atcoder_jp)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
+    print(soup)
     contests = soup.find_all(href=re.compile("contest.atcoder.jp"))
+    inserted_count = 0
     for contest in contests:
         contest_url = contest.get('href')
         rex = re.compile("\w*//(.*)\.contest\.atcoder\.jp\w*")
@@ -35,14 +40,19 @@ def crawl_atcoder_jp():
             print(cid)
             cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
-                cur.execute("""INSERT INTO contests(contestid) VALUES (%s)""",(cid,))
+                cur.execute("""INSERT INTO contests(contestid) SELECT %s WHERE NOT EXISTS (SELECT 1 FROM contests WHERE contestid=%s)""",(cid,cid))
                 connector.commit()
+                inserted_count += 1
             except Exception as e:
                 connector.rollback()
                 print("Already inserted or Something wrong")
                 print(e.message)
             cur.close()
         print("")
+    next_page = soup.find_all(href=re.compile("p=" + str(page)))
+    print(next_page)
+    for page_link in next_page:
+        crawl_contest_list(page+1)
 
 def insert_problem(cid,problemid,title):
     global connector
@@ -115,7 +125,7 @@ def fetch_contest_list():
 
 if __name__ == "__main__":
     connector = psycopg2.connect(pguser.arg)
-    crawl_atcoder_jp()
+    crawl_contest_list(1)
     contest_list = fetch_contest_list()
     print(contest_list)
     for contest in contest_list:
