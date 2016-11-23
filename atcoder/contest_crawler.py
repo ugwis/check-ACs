@@ -45,8 +45,8 @@ def crawl_contest_list(page):
                 inserted_count += 1
             except Exception as e:
                 connector.rollback()
-                print("Already inserted or Something wrong")
-                print(e.message)
+                #print("Already inserted or Something wrong")
+                #print(e.message)
             cur.close()
         print("")
     next_page = soup.find_all(href=re.compile("p=" + str(page)))
@@ -62,7 +62,7 @@ def insert_problem(cid,problemid,title):
         connector.commit()
     except Exception as e:
         connector.commit()
-        print(e.message)
+        #print(e.message)
     cur.close()
 
 def insert_contest(contest_name,contest_begin,contest_end,contestid):
@@ -73,17 +73,17 @@ def insert_contest(contest_name,contest_begin,contest_end,contestid):
         connector.commit()
     except Exception as e:
         connector.rollback()
-        print(e.message)
+        #print(e.message)
     cur.close()
 
 def crawl_contest(contestid,cid):
     url = "http://" + contestid + "." + contest_atcoder + "/assignments"
-    print("crawl URL: " + url)
+    print(url)
     r = requests.get(url)
-    print(r.text.encode(r.encoding))
+    #print(r.text.encode(r.encoding))
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
     tasks = soup.find_all("tr")
-    print(tasks)
+    #print(tasks)
     if tasks == []:
         return
     contest_name = soup.find("span",class_="contest-name").string
