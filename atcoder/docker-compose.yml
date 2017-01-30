@@ -1,0 +1,23 @@
+atcoder:
+    build: ./app
+    links:
+        - pgsql
+    environment:
+        DB_USER: postgres
+        DB_PASS: postgres
+        PGPASSWORD: postgres
+        CK: XEESN8sqvfroJxjbyoEqCpaax
+        CS: LMTk0dPHjAOHshA4BXQXQHU76DUVC424xdIXKolE2bnDeTHmJy
+        AT: 4076952140-kpwPwbCVlO1Vqr0MFh222jFokv67CXovWTgiXms
+        AS: 6RDczEw5EwWvxd1MWDsb3MoCkMSiyrGOLVql3SPYVpR87
+    volumes:
+        - ./app/:/root/app
+    entrypoint: ./wait-for-it/wait-for-it.sh pgsql:5432 -- sh init.sh
+pgsql:
+    image: postgres
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: atcoderdb
+    expose:
+        - "5432"
