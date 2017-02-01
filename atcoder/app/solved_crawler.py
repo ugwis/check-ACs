@@ -23,7 +23,7 @@ def regex(r,text):
     match = rec.search(text)
     if match is None:
         print("--regex doesn't matched folowing text--")
-        print(text)
+        #print(text)
         return None
     return match.group(1)
 
@@ -97,12 +97,12 @@ def insert_solved(rid,userid,username,contestid,problemid,language,cputime,memor
         cur.close()
         return None
     cur.close()
-    print("inserted:" + str(rid))
+    #print("inserted:" + str(rid))
     return 1
 
 def crawl_contest_solved_page(contestid,page,type):
     url = "http://" + contestid + "." + contest_atcoder + "/submissions/all/" + str(page) + "?status=AC"
-    print(url)
+    #print(url)
     ret = []
     r = requests.get(url)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
@@ -137,7 +137,7 @@ def update_crawled(cid):
         connector.commit()
     except Exception as e:
         connector.rollback()
-        print(e.message)
+        #print(e.message)
     cur.close()
 
 def crawl_contest_solved_pages(cid,contestid,type):
@@ -146,7 +146,7 @@ def crawl_contest_solved_pages(cid,contestid,type):
         i+=1
         try:
             status = crawl_contest_solved_page(contestid,i,type)
-            print(status)
+            #print(status)
             if status == 'Finish':
                 update_crawled(cid)
                 return
