@@ -77,3 +77,5 @@ $$
 LANGUAGE plpgsql;
 
 CREATE INDEX solved_pid_uid_rid_index ON solved(pid,uid,rid); 
+
+
