@@ -26,7 +26,6 @@ def regex(r,text):
 def crawl_contest_list(page):
     global connector
     url = url_atcoder_jp + "/contest/archive?lang=ja&p=" + str(page)
-    print(url)
     r = requests.get(url)
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
     contests = soup.find_all(href=re.compile("contest.atcoder.jp"))
@@ -37,7 +36,6 @@ def crawl_contest_list(page):
         match = rex.search(contest_url)
         if match is not None:
             cid = match.group(1)
-            print(cid)
             cur = connector.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
                 cur.execute("""INSERT INTO contests(contestid) SELECT %s WHERE NOT EXISTS (SELECT 1 FROM contests WHERE contestid=%s)""",(cid,cid))
@@ -48,9 +46,7 @@ def crawl_contest_list(page):
                 print("Already inserted or Something wrong")
                 print(e.message)
             cur.close()
-        print("")
     next_page = soup.find_all(href=re.compile("p=" + str(page+1)))
-    print(next_page)
     if len(next_page):
         crawl_contest_list(page+1)
 
@@ -78,7 +74,7 @@ def insert_contest(contest_name,contest_begin,contest_end,contestid):
 
 def crawl_contest(contestid,cid):
     url = "http://" + contestid + "." + contest_atcoder + "/assignments"
-    print(url)
+    #print(url)
     r = requests.get(url)
     #print(r.text.encode(r.encoding))
     soup = BeautifulSoup(r.text.encode(r.encoding),"html.parser")
@@ -87,12 +83,12 @@ def crawl_contest(contestid,cid):
     if tasks == []:
         return
     contest_name = soup.find("span",class_="contest-name").string.encode('utf-8')
-    print("contest name: " + contest_name)
+    #print("contest name: " + contest_name)
     contest_term = soup.find_all("time")
     contest_begin = contest_term[0].string
     contest_end = contest_term[1].string
-    print("contest begin: " + contest_begin)
-    print("contest end: " + contest_end)
+    #print("contest begin: " + contest_begin)
+    #print("contest end: " + contest_end)
     insert_contest(contest_name,contest_begin,contest_end,contestid)
  
     for task in tasks:
@@ -127,6 +123,7 @@ if __name__ == "__main__":
     crawl_contest_list(1)
     contest_list = fetch_contest_list()
     for contest in contest_list:
+        print('crawling: ' + contest['contestid'])
         try:
             crawl_contest(contest['contestid'],contest['cid'])
         except Exception as e:

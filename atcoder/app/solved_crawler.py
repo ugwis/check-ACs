@@ -180,6 +180,7 @@ if __name__ == "__main__":
     connector = psycopg2.connect(pguser.arg)
     contests = fetch_ended_contest_list()
     for contest in contests:
+        print('crawling: ' + contest['contestid'])
         if contest['crawled']:
             crawl_contest_solved_pages(contest['cid'],contest['contestid'],"normal")
         else:
