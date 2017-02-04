@@ -12,6 +12,8 @@ import numpy as np
 import json
 from requests_oauthlib import OAuth1Session
 from bs4 import BeautifulSoup
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 checkusers = ['bgpat','goryudyuma','Makinami','murashin','not_seele','toga2048','ugwis','wanimaru47','tsunetoki','sn_93','scn_13k','fono09']
 
