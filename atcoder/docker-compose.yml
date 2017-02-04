@@ -14,7 +14,7 @@ atcoder:
         - ./app/:/root/app
     entrypoint: ./wait-for-it/wait-for-it.sh pgsql:5432 -- sh init.sh
 pgsql:
-    image: postgres
+    build: ./pgsql
     environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
