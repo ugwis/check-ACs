@@ -7,7 +7,7 @@ import xmltodict
 import twitter
 import requests
 
-checkusers = ['ugwis','wanimaru','dyuma','iyselee','bgpat','toga2048','tomosan26']
+checkusers = ['ugwis','wanimaru','dyuma','iyselee','bgpat','toga2048','tomosan26','aota']
 
 histogram_filename = "hist-aoj.png"
 
